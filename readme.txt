@@ -1,7 +1,7 @@
 === Beauty Basant ===
 Requires at least: 6.0
 Tested up to: 6.6
-Requires PHP: 7.4
+Requires PHP: 8.2
 License: GPLv2 or later
 
 A custom WordPress theme for Beauty Basant, a Dead Sea minerals skincare brand.
