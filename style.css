@@ -1,0 +1,22 @@
+/*
+Theme Name: Beauty Basant
+Theme URI: https://beautybasant.com
+Author: Beauty Basant
+Author URI: https://beautybasant.com
+Description: A luxurious skincare & Dead Sea minerals WordPress theme with WooCommerce support, custom hero slider, testimonials and newsletter sections.
+Version: 1.0.0
+Requires at least: 6.0
+Requires PHP: 7.4
+Tested up to: 6.6
+License: GNU General Public License v2 or later
+License URI: LICENSE
+Text Domain: beauty-basant
+Tags: e-commerce, custom-menu, featured-images, threaded-comments, translation-ready
+
+Beauty Basant WordPress Theme, Copyright 2026
+Beauty Basant is distributed under the terms of the GNU GPL.
+*/
+
+/* This file intentionally left as the required theme stylesheet header.
+   All visual styles live in assets/css/theme.css and are enqueued in functions.php
+   so browser caching / versioning works cleanly. */
