@@ -50,3 +50,20 @@ function beauty_basant_account_url() {
 	}
 	return '#';
 }
+
+/**
+ * Shared page-header banner used on Contact, Services, Shop, Single Product
+ * and My Account pages so every inner page opens with the same look.
+ */
+function beauty_basant_page_hero( $subtitle, $title ) {
+	?>
+	<div class="page-hero">
+		<div class="page-hero-inner">
+			<?php if ( $subtitle ) : ?>
+				<div class="subtitle"><?php echo esc_html( $subtitle ); ?></div>
+			<?php endif; ?>
+			<h1 class="title"><?php echo esc_html( $title ); ?></h1>
+		</div>
+	</div>
+	<?php
+}

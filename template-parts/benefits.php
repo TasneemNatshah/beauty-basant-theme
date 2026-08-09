@@ -1,21 +1,33 @@
 <?php
 /**
- * Benefits banner (3 fixed items, editable via Customizer).
+ * Benefits banner — pulls from the `benefit_item` CPT so items can be
+ * added/removed/reordered freely in wp-admin.
  *
  * @package BeautyBasant
  */
+
+$benefits_query = new WP_Query( array(
+	'post_type'      => 'benefit_item',
+	'posts_per_page' => -1,
+	'orderby'        => 'menu_order',
+	'order'          => 'ASC',
+) );
+
+if ( ! $benefits_query->have_posts() ) {
+	return;
+}
 ?>
 <div class="benefits-bar">
-	<?php for ( $i = 1; $i <= 3; $i++ ) :
-		$icon = beauty_basant_opt( "benefit_{$i}_icon", 'ti-leaf' );
-		$text = beauty_basant_opt( "benefit_{$i}_text", '' );
-		if ( ! $text ) {
-			continue;
-		}
+	<?php
+	while ( $benefits_query->have_posts() ) :
+		$benefits_query->the_post();
+		$icon = get_post_meta( get_the_ID(), '_benefit_icon', true );
+		$icon = $icon ? $icon : 'ti-leaf';
 		?>
 		<div class="benefit-item">
 			<i class="ti <?php echo esc_attr( $icon ); ?>"></i>
-			<span><?php echo esc_html( $text ); ?></span>
+			<span><?php the_title(); ?></span>
 		</div>
-	<?php endfor; ?>
+	<?php endwhile; ?>
 </div>
+<?php wp_reset_postdata(); ?>

@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'BEAUTY_BASANT_VERSION', '1.0.0' );
+define( 'BEAUTY_BASANT_VERSION', '1.1.0' );
 define( 'BEAUTY_BASANT_DIR', get_template_directory() );
 define( 'BEAUTY_BASANT_URI', get_template_directory_uri() );
 
@@ -46,6 +46,7 @@ function beauty_basant_setup() {
 
 	add_image_size( 'beauty-basant-hero', 1600, 800, true );
 	add_image_size( 'beauty-basant-product', 600, 600, true );
+	add_image_size( 'beauty-basant-service', 500, 350, true );
 }
 add_action( 'after_setup_theme', 'beauty_basant_setup' );
 
@@ -60,8 +61,8 @@ function beauty_basant_scripts() {
 
 	wp_enqueue_script( 'beauty-basant-main', BEAUTY_BASANT_URI . '/assets/js/main.js', array(), BEAUTY_BASANT_VERSION, true );
 	wp_localize_script( 'beauty-basant-main', 'beautyBasant', array(
-		'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-		'nonce'   => wp_create_nonce( 'beauty_basant_newsletter' ),
+		'ajaxUrl'       => admin_url( 'admin-ajax.php' ),
+		'contactNonce'  => wp_create_nonce( 'beauty_basant_contact' ),
 	) );
 
 	if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
@@ -74,10 +75,13 @@ add_action( 'wp_enqueue_scripts', 'beauty_basant_scripts' );
  * Includes.
  */
 require BEAUTY_BASANT_DIR . '/inc/template-tags.php';
-require BEAUTY_BASANT_DIR . '/inc/customizer.php';
 require BEAUTY_BASANT_DIR . '/inc/cpt-hero-slides.php';
 require BEAUTY_BASANT_DIR . '/inc/cpt-testimonials.php';
-require BEAUTY_BASANT_DIR . '/inc/newsletter.php';
+require BEAUTY_BASANT_DIR . '/inc/cpt-benefits.php';
+require BEAUTY_BASANT_DIR . '/inc/cpt-services.php';
+require BEAUTY_BASANT_DIR . '/inc/customizer.php';
+require BEAUTY_BASANT_DIR . '/inc/contact-form.php';
+require BEAUTY_BASANT_DIR . '/inc/legal-pages.php';
 
 if ( class_exists( 'WooCommerce' ) ) {
 	require BEAUTY_BASANT_DIR . '/inc/woocommerce.php';

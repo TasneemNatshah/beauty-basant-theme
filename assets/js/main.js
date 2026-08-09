@@ -75,37 +75,39 @@
     });
   }
 
-  /* ---------- Newsletter AJAX subscribe ---------- */
-  function initNewsletter() {
-    var form = document.querySelector('.newsletter-form');
+  /* ---------- Contact form AJAX submit ---------- */
+  function initContactForm() {
+    var form = document.querySelector('.contact-form');
     if (!form || typeof beautyBasant === 'undefined') return;
+
+    var msg = form.querySelector('.form-message');
+    var submitBtn = form.querySelector('button[type="submit"]');
 
     form.addEventListener('submit', function (e) {
       e.preventDefault();
-      var input = form.querySelector('input[type="email"]');
-      var msg = form.parentNode.querySelector('.newsletter-message');
-      var email = input ? input.value.trim() : '';
 
-      if (!email) return;
+      var data = new FormData(form);
+      data.append('action', 'beauty_basant_contact');
+      data.append('nonce', beautyBasant.contactNonce);
 
-      var data = new FormData();
-      data.append('action', 'beauty_basant_subscribe');
-      data.append('nonce', beautyBasant.nonce);
-      data.append('email', email);
+      if (submitBtn) submitBtn.disabled = true;
 
       fetch(beautyBasant.ajaxUrl, { method: 'POST', body: data })
         .then(function (res) { return res.json(); })
         .then(function (res) {
           if (!msg) return;
           msg.textContent = res.data && res.data.message ? res.data.message : '';
-          msg.className = 'newsletter-message ' + (res.success ? 'success' : 'error');
-          if (res.success) input.value = '';
+          msg.className = 'form-message ' + (res.success ? 'success' : 'error');
+          if (res.success) form.reset();
         })
         .catch(function () {
           if (msg) {
             msg.textContent = 'Something went wrong. Please try again.';
-            msg.className = 'newsletter-message error';
+            msg.className = 'form-message error';
           }
+        })
+        .finally(function () {
+          if (submitBtn) submitBtn.disabled = false;
         });
     });
   }
@@ -113,6 +115,6 @@
   document.addEventListener('DOMContentLoaded', function () {
     initSlider();
     initMenuToggle();
-    initNewsletter();
+    initContactForm();
   });
 })();

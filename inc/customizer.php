@@ -9,7 +9,88 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+require BEAUTY_BASANT_DIR . '/inc/class-product-picker-control.php';
+
+function beauty_basant_sanitize_checkbox( $checked ) {
+	return (bool) $checked;
+}
+
+function beauty_basant_sanitize_product_ids( $value ) {
+	$ids = json_decode( is_string( $value ) ? $value : '', true );
+	if ( ! is_array( $ids ) ) {
+		return array();
+	}
+	return array_map( 'absint', $ids );
+}
+
 function beauty_basant_customize_register( $wp_customize ) {
+
+	/* ---------------------------------------------------------------
+	 * Homepage Sections — show/hide
+	 * ------------------------------------------------------------- */
+	$wp_customize->add_panel( 'beauty_basant_homepage', array(
+		'title'    => __( 'Homepage', 'beauty-basant' ),
+		'priority' => 20,
+	) );
+
+	$wp_customize->add_section( 'beauty_basant_sections', array(
+		'title'       => __( 'Section Visibility', 'beauty-basant' ),
+		'panel'       => 'beauty_basant_homepage',
+		'description' => __( 'Turn homepage sections on or off.', 'beauty-basant' ),
+		'priority'    => 5,
+	) );
+
+	$sections = array(
+		'section_hero'         => array( 'label' => __( 'Show Hero Slider', 'beauty-basant' ), 'default' => true ),
+		'section_collection'   => array( 'label' => __( 'Show Our Collection', 'beauty-basant' ), 'default' => true ),
+		'section_posts'        => array( 'label' => __( 'Show Latest Posts', 'beauty-basant' ), 'default' => true ),
+		'section_story'        => array( 'label' => __( 'Show Our Story', 'beauty-basant' ), 'default' => true ),
+		'section_testimonials' => array( 'label' => __( 'Show Testimonials', 'beauty-basant' ), 'default' => true ),
+		'section_benefits'     => array( 'label' => __( 'Show Benefits Bar', 'beauty-basant' ), 'default' => true ),
+	);
+
+	foreach ( $sections as $id => $field ) {
+		$wp_customize->add_setting( $id, array(
+			'default'           => $field['default'],
+			'sanitize_callback' => 'beauty_basant_sanitize_checkbox',
+		) );
+		$wp_customize->add_control( $id, array(
+			'label'   => $field['label'],
+			'section' => 'beauty_basant_sections',
+			'type'    => 'checkbox',
+		) );
+	}
+
+	/* ---------------------------------------------------------------
+	 * Our Collection — which products + image height
+	 * ------------------------------------------------------------- */
+	$wp_customize->add_section( 'beauty_basant_collection', array(
+		'title'       => __( 'Our Collection', 'beauty-basant' ),
+		'panel'       => 'beauty_basant_homepage',
+		'description' => __( 'Choose which products appear in the homepage collection grid. Leave empty to auto-show featured (or latest) products.', 'beauty-basant' ),
+		'priority'    => 10,
+	) );
+
+	$wp_customize->add_setting( 'collection_products', array(
+		'default'           => array(),
+		'sanitize_callback' => 'beauty_basant_sanitize_product_ids',
+	) );
+	$wp_customize->add_control( new Beauty_Basant_Product_Picker_Control( $wp_customize, 'collection_products', array(
+		'label'   => __( 'Products to display', 'beauty-basant' ),
+		'section' => 'beauty_basant_collection',
+	) ) );
+
+	$wp_customize->add_setting( 'collection_image_height', array(
+		'default'           => 200,
+		'sanitize_callback' => 'absint',
+	) );
+	$wp_customize->add_control( 'collection_image_height', array(
+		'label'       => __( 'Product image height (px)', 'beauty-basant' ),
+		'description' => __( 'Also used for the latest-posts card images.', 'beauty-basant' ),
+		'section'     => 'beauty_basant_collection',
+		'type'        => 'number',
+		'input_attrs' => array( 'min' => 100, 'max' => 500, 'step' => 10 ),
+	) );
 
 	/* ---------------------------------------------------------------
 	 * Top Bar
@@ -34,7 +115,8 @@ function beauty_basant_customize_register( $wp_customize ) {
 	 * ------------------------------------------------------------- */
 	$wp_customize->add_section( 'beauty_basant_story', array(
 		'title'    => __( 'Homepage — Our Story Section', 'beauty-basant' ),
-		'priority' => 30,
+		'panel'    => 'beauty_basant_homepage',
+		'priority' => 15,
 	) );
 
 	$story_fields = array(
@@ -62,81 +144,10 @@ function beauty_basant_customize_register( $wp_customize ) {
 		'sanitize_callback' => 'absint',
 	) );
 	$wp_customize->add_control( new WP_Customize_Media_Control( $wp_customize, 'story_image', array(
-		'label'    => __( 'Story image', 'beauty-basant' ),
-		'section'  => 'beauty_basant_story',
+		'label'     => __( 'Story image', 'beauty-basant' ),
+		'section'   => 'beauty_basant_story',
 		'mime_type' => 'image',
 	) ) );
-
-	/* ---------------------------------------------------------------
-	 * Newsletter Section
-	 * ------------------------------------------------------------- */
-	$wp_customize->add_section( 'beauty_basant_newsletter', array(
-		'title'    => __( 'Homepage — Newsletter Section', 'beauty-basant' ),
-		'priority' => 35,
-	) );
-
-	$newsletter_fields = array(
-		'newsletter_subtitle'   => array( 'label' => __( 'Eyebrow subtitle', 'beauty-basant' ), 'default' => 'Join Our Beauty Club' ),
-		'newsletter_title'      => array( 'label' => __( 'Heading', 'beauty-basant' ), 'default' => 'Get 10% Off Your First Order' ),
-		'newsletter_desc'       => array( 'label' => __( 'Description', 'beauty-basant' ), 'default' => 'Subscribe to our newsletter for exclusive discounts and skincare secrets.' ),
-	);
-	foreach ( $newsletter_fields as $id => $field ) {
-		$wp_customize->add_setting( $id, array(
-			'default'           => $field['default'],
-			'sanitize_callback' => 'sanitize_text_field',
-		) );
-		$wp_customize->add_control( $id, array(
-			'label'   => $field['label'],
-			'section' => 'beauty_basant_newsletter',
-			'type'    => 'text',
-		) );
-	}
-
-	/* ---------------------------------------------------------------
-	 * Benefits Bar (3 fixed items)
-	 * ------------------------------------------------------------- */
-	$wp_customize->add_section( 'beauty_basant_benefits', array(
-		'title'    => __( 'Homepage — Benefits Bar', 'beauty-basant' ),
-		'priority' => 40,
-	) );
-
-	$icon_choices = array(
-		'ti-leaf'          => __( 'Leaf', 'beauty-basant' ),
-		'ti-heart'         => __( 'Heart', 'beauty-basant' ),
-		'ti-truck'         => __( 'Truck', 'beauty-basant' ),
-		'ti-shield-check'  => __( 'Shield Check', 'beauty-basant' ),
-		'ti-recycle'       => __( 'Recycle', 'beauty-basant' ),
-		'ti-award'         => __( 'Award', 'beauty-basant' ),
-	);
-
-	$defaults = array(
-		1 => array( 'icon' => 'ti-leaf', 'text' => '100% NATURAL' ),
-		2 => array( 'icon' => 'ti-heart', 'text' => 'CRUELTY FREE' ),
-		3 => array( 'icon' => 'ti-truck', 'text' => 'FAST SHIPPING' ),
-	);
-
-	for ( $i = 1; $i <= 3; $i++ ) {
-		$wp_customize->add_setting( "benefit_{$i}_icon", array(
-			'default'           => $defaults[ $i ]['icon'],
-			'sanitize_callback' => 'sanitize_html_class',
-		) );
-		$wp_customize->add_control( "benefit_{$i}_icon", array(
-			'label'   => sprintf( __( 'Item %d icon', 'beauty-basant' ), $i ),
-			'section' => 'beauty_basant_benefits',
-			'type'    => 'select',
-			'choices' => $icon_choices,
-		) );
-
-		$wp_customize->add_setting( "benefit_{$i}_text", array(
-			'default'           => $defaults[ $i ]['text'],
-			'sanitize_callback' => 'sanitize_text_field',
-		) );
-		$wp_customize->add_control( "benefit_{$i}_text", array(
-			'label'   => sprintf( __( 'Item %d text', 'beauty-basant' ), $i ),
-			'section' => 'beauty_basant_benefits',
-			'type'    => 'text',
-		) );
-	}
 
 	/* ---------------------------------------------------------------
 	 * Contact & Social
@@ -147,12 +158,13 @@ function beauty_basant_customize_register( $wp_customize ) {
 	) );
 
 	$contact_fields = array(
-		'contact_email'      => array( 'label' => __( 'Email address', 'beauty-basant' ), 'default' => 'info@beautybasant.com', 'sanitize' => 'sanitize_email' ),
-		'contact_phone'      => array( 'label' => __( 'Phone number', 'beauty-basant' ), 'default' => '+962 7 9000 0000', 'sanitize' => 'sanitize_text_field' ),
-		'contact_address'    => array( 'label' => __( 'Address', 'beauty-basant' ), 'default' => 'Amman, Jordan', 'sanitize' => 'sanitize_text_field' ),
-		'social_instagram'   => array( 'label' => __( 'Instagram URL', 'beauty-basant' ), 'default' => '#', 'sanitize' => 'esc_url_raw' ),
-		'social_facebook'    => array( 'label' => __( 'Facebook URL', 'beauty-basant' ), 'default' => '#', 'sanitize' => 'esc_url_raw' ),
-		'social_whatsapp'    => array( 'label' => __( 'WhatsApp URL', 'beauty-basant' ), 'default' => '#', 'sanitize' => 'esc_url_raw' ),
+		'contact_email'    => array( 'label' => __( 'Email address', 'beauty-basant' ), 'default' => 'info@beautybasant.com', 'sanitize' => 'sanitize_email' ),
+		'contact_phone'    => array( 'label' => __( 'Phone number', 'beauty-basant' ), 'default' => '+962 7 9000 0000', 'sanitize' => 'sanitize_text_field' ),
+		'contact_address'  => array( 'label' => __( 'Address', 'beauty-basant' ), 'default' => 'Amman, Jordan', 'sanitize' => 'sanitize_text_field' ),
+		'contact_map_embed'=> array( 'label' => __( 'Google Maps embed URL (optional)', 'beauty-basant' ), 'default' => '', 'sanitize' => 'esc_url_raw' ),
+		'social_instagram' => array( 'label' => __( 'Instagram URL', 'beauty-basant' ), 'default' => '#', 'sanitize' => 'esc_url_raw' ),
+		'social_facebook'  => array( 'label' => __( 'Facebook URL', 'beauty-basant' ), 'default' => '#', 'sanitize' => 'esc_url_raw' ),
+		'social_whatsapp'  => array( 'label' => __( 'WhatsApp URL', 'beauty-basant' ), 'default' => '#', 'sanitize' => 'esc_url_raw' ),
 	);
 	foreach ( $contact_fields as $id => $field ) {
 		$wp_customize->add_setting( $id, array(
