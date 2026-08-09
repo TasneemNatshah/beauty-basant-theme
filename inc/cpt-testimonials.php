@@ -115,3 +115,4 @@ function beauty_basant_seed_testimonials() {
 	update_option( 'beauty_basant_testimonials_seeded', 1 );
 }
 add_action( 'after_switch_theme', 'beauty_basant_seed_testimonials' );
+add_action( 'init', 'beauty_basant_seed_testimonials', 20 );

@@ -6,8 +6,12 @@
  *
  * @package BeautyBasant
  */
+$collection_chosen = get_theme_mod( 'collection_products', array() );
+$collection_limit  = ! empty( $collection_chosen ) ? count( $collection_chosen ) : 3;
+$img_height        = (int) get_theme_mod( 'collection_image_height', 200 );
+$img_height        = $img_height ? $img_height : 200;
 ?>
-<section class="section" id="products">
+<section class="section" id="products" style="--product-img-height: <?php echo esc_attr( $img_height ); ?>px;">
 	<div class="section-title-wrap">
 		<div class="subtitle"><?php esc_html_e( 'Our Collection', 'beauty-basant' ); ?></div>
 		<div class="title"><?php esc_html_e( 'Dead Sea Essentials', 'beauty-basant' ); ?></div>
@@ -16,7 +20,7 @@
 	<?php if ( class_exists( 'WooCommerce' ) ) : ?>
 
 		<?php
-		$products = beauty_basant_get_homepage_products( 3 );
+		$products = beauty_basant_get_homepage_products( $collection_limit );
 		if ( $products ) :
 			?>
 			<ul class="products product-grid">

@@ -148,3 +148,4 @@ function beauty_basant_seed_hero_slides() {
 	update_option( 'beauty_basant_slides_seeded', 1 );
 }
 add_action( 'after_switch_theme', 'beauty_basant_seed_hero_slides' );
+add_action( 'init', 'beauty_basant_seed_hero_slides', 20 );

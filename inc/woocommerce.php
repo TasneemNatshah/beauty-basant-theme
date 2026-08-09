@@ -16,6 +16,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 remove_action( 'woocommerce_before_main_content', 'woocommerce_output_content_wrapper', 10 );
 remove_action( 'woocommerce_after_main_content', 'woocommerce_output_content_wrapper_end', 10 );
 
+function beauty_basant_wc_page_hero() {
+	if ( is_shop() ) {
+		beauty_basant_page_hero( __( 'Our Collection', 'beauty-basant' ), __( 'Shop All Products', 'beauty-basant' ) );
+	} elseif ( is_product_category() || is_product_tag() ) {
+		beauty_basant_page_hero( __( 'Our Collection', 'beauty-basant' ), single_term_title( '', false ) );
+	} elseif ( is_product() ) {
+		beauty_basant_page_hero( __( 'Product Details', 'beauty-basant' ), get_the_title() );
+	} elseif ( is_account_page() ) {
+		beauty_basant_page_hero( __( 'Welcome Back', 'beauty-basant' ), __( 'My Account', 'beauty-basant' ) );
+	} elseif ( is_cart() ) {
+		beauty_basant_page_hero( __( 'Almost There', 'beauty-basant' ), __( 'Your Cart', 'beauty-basant' ) );
+	} elseif ( is_checkout() ) {
+		beauty_basant_page_hero( __( 'Secure Checkout', 'beauty-basant' ), __( 'Checkout', 'beauty-basant' ) );
+	}
+}
+add_action( 'woocommerce_before_main_content', 'beauty_basant_wc_page_hero', 5 );
+
 function beauty_basant_wc_wrapper_start() {
 	echo '<section class="section woocommerce-page-wrap"><div class="woocommerce-container">';
 }
@@ -45,11 +62,25 @@ add_filter( 'loop_shop_per_page', function () { return 12; } );
 add_filter( 'woocommerce_enqueue_styles', '__return_empty_array' );
 
 /**
- * Mini helper: featured products for the homepage collection grid.
+ * Homepage collection grid products: explicit picks from the Customizer win,
+ * otherwise fall back to featured products, otherwise the latest products.
  */
 function beauty_basant_get_homepage_products( $limit = 3 ) {
 	if ( ! class_exists( 'WooCommerce' ) ) {
 		return array();
+	}
+
+	$chosen = get_theme_mod( 'collection_products', array() );
+	if ( ! empty( $chosen ) ) {
+		$products = wc_get_products( array(
+			'status'  => 'publish',
+			'include' => array_map( 'absint', $chosen ),
+			'limit'   => count( $chosen ),
+			'orderby' => 'post__in',
+		) );
+		if ( $products ) {
+			return $products;
+		}
 	}
 
 	$featured = wc_get_featured_product_ids();
